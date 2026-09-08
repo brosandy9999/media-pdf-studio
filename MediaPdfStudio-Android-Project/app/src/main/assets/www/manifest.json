@@ -1,0 +1,18 @@
+{
+  "name": "Media PDF Studio",
+  "short_name": "MediaPdfStudio",
+  "description": "Create and edit interactive offline PDFs with audio on Android",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#13161c",
+  "theme_color": "#1a2028",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%231a2028'/%3E%3Cpath d='M256 100c-77.3 0-140 62.7-140 140v90c0 22.1 17.9 40 40 40h30c11 0 20-8.9 20-20v-80c0-11-8.9-20-20-20h-30v-10c0-55.2 44.8-100 100-100s100 44.8 100 100v10h-30c-11 0-20 8.9-20 20v80c0 11 8.9 20 20 20h30c22.1 0 40-17.9 40-40v-90c0-77.3-62.7-140-140-140z' fill='%23484d56'/%3E%3Cpolygon points='230,220 310,270 230,320' fill='%2320b2aa'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

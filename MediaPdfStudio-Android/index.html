@@ -1,0 +1,2694 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a2028" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Media PDF Studio · EPS-TOPIK Book Edition</title>
+  <style>
+    :root {
+      --bg: #13161c;
+      --panel: #1a2028;
+      --panel2: #222a36;
+      --panel3: #2a3442;
+      --line: #344050;
+      --text: #f0f4f8;
+      --muted: #9ba8b8;
+      
+      /* Korean Textbook Palette */
+      --accent-teal: #20b2aa;
+      --accent-teal-dark: #19948d;
+      --accent-coral: #e57088;
+      --accent-coral-dark: #cc546c;
+      --accent-olive: #8da336;
+      --accent-olive-dark: #768a2b;
+      --accent-purple: #6259b6;
+      --accent-purple-dark: #504899;
+      --accent-slate: #252b36;
+      --headphone-slate: #484d56;
+
+      --accent: var(--accent-teal);
+      --accent2: var(--accent-teal-dark);
+      --danger: var(--accent-coral);
+
+      scrollbar-color: #49586c #161b22;
+      scrollbar-width: thin;
+    }
+    * { box-sizing: border-box; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #161b22; }
+    ::-webkit-scrollbar-thumb { background: #49586c; border-radius: 4px; border: 2px solid #161b22; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-teal); }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.4 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      user-select: none;
+    }
+    button, input, select { font: inherit; }
+    button {
+      cursor: pointer;
+      border: 0;
+      color: var(--text);
+      background: var(--panel2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 7px 11px;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      touch-action: manipulation;
+    }
+    button:hover { border-color: #5c6e84; background: #2c3644; }
+    button:active { transform: scale(0.97); }
+    button.primary { background: var(--accent2); border-color: var(--accent); color: #ffffff; font-weight: 700; }
+    button.primary:hover { background: var(--accent); }
+    button.coral { background: var(--accent-coral-dark); border-color: var(--accent-coral); color: #ffffff; font-weight: 700; }
+    button.coral:hover { background: var(--accent-coral); }
+    button.olive { background: var(--accent-olive-dark); border-color: var(--accent-olive); color: #ffffff; font-weight: 700; }
+    button.olive:hover { background: var(--accent-olive); }
+    button.purple { background: var(--accent-purple-dark); border-color: var(--accent-purple); color: #ffffff; font-weight: 700; }
+    button.ghost { background: transparent; }
+    .icon { font-size: 16px; padding: 5px 9px; }
+
+    .app {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      height: 100vh;
+      height: 100dvh;
+    }
+    .sidebar {
+      background: var(--panel);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Textbook styled brand */
+    .brand {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #1f2631;
+    }
+    .brand-tag {
+      display: inline-flex;
+      align-items: center;
+      background: var(--accent-slate);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 4px;
+      border: 1px solid #3c4858;
+    }
+    .brand-tag .icon-box {
+      background: var(--accent-slate);
+      color: #fff;
+      padding: 3px 7px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+    }
+    .brand-tag .title-box {
+      background: var(--accent-coral);
+      color: #fff;
+      padding: 3px 9px;
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 0.3px;
+    }
+    .brand-tag .lang-box {
+      background: #e88fa2;
+      color: #fff;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .brand p { margin: 0; color: var(--muted); font-size: 11px; }
+
+    .nav-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--line);
+      background: #181f28;
+    }
+    .nav-tab {
+      flex: 1;
+      padding: 9px 8px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .nav-tab:hover { color: var(--text); background: #1f2835; }
+    .nav-tab.active { color: #fff; border-bottom-color: var(--accent-teal); background: #1c2532; }
+
+    .section { padding: 14px 16px 0; }
+    .section h2 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.1px;
+      color: var(--muted);
+      margin: 0 0 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .row { display: flex; gap: 6px; }
+    .row > * { flex: 1; }
+
+    /* CHAPTER SELECTOR & RENAME */
+    .chapter-box {
+      background: #13171e;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-top: 6px;
+    }
+    .chapter-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .chapter-title-row strong {
+      font-size: 13px;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chapter-actions {
+      display: flex;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .chapter-actions button {
+      flex: 1;
+      padding: 4px 6px;
+      font-size: 11px;
+    }
+
+    /* SCROLLABLE MEDIA LIST VIEW */
+    .media-panel {
+      display: flex;
+      flex-direction: column;
+      margin-top: 6px;
+    }
+    .media-list-container {
+      max-height: 200px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #13171e;
+      margin-top: 7px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .media-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--line);
+    }
+    .media-row {
+      display: flex;
+      align-items: center;
+      background: #151a22;
+      padding: 6px 8px;
+      gap: 6px;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .media-row:hover { background: #1c232e; }
+    .media-row.selected { background: #1e2836; border-left: 3px solid var(--accent-teal); }
+    .media-row .play-btn {
+      padding: 3px 6px;
+      font-size: 11px;
+      background: var(--panel2);
+      border-radius: 4px;
+      flex-shrink: 0;
+      color: var(--accent-teal);
+    }
+    .media-row .title-col {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .media-row .title-col strong {
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #eef2f6;
+    }
+    .media-row .title-col span {
+      font-size: 10px;
+      color: var(--muted);
+    }
+    .media-row .place-action {
+      font-size: 10px;
+      padding: 4px 6px;
+      background: var(--accent2);
+      color: #fff;
+      border: 0;
+      border-radius: 4px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .media-row .place-action:hover { background: var(--accent); }
+    .media-row .del-btn {
+      padding: 3px 6px;
+      font-size: 11px;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      flex-shrink: 0;
+    }
+    .media-row .del-btn:hover { color: var(--danger); }
+
+    .empty { color: var(--muted); font-size: 11px; padding: 14px; text-align: center; }
+
+    .section label { display: flex; flex-direction: column; gap: 4px; color: var(--muted); font-size: 11px; flex: 1; }
+    .section select { width: 100%; background: var(--panel2); border: 1px solid var(--line); border-radius: 5px; color: var(--text); padding: 6px; font-size: 12px; }
+    .section input[type=color] { width: 100%; height: 28px; padding: 2px; background: var(--panel2); border: 1px solid var(--line); border-radius: 5px; cursor: pointer; }
+    .section input[type=range] { width: 100%; accent-color: var(--accent-teal); }
+
+    /* Palette chips matching textbook images */
+    .color-presets {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .color-chip {
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      border: 1px solid #48586c;
+      cursor: pointer;
+      padding: 0;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .color-chip:hover { transform: scale(1.2); border-color: #fff; }
+
+    .footer { padding: 12px 16px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted); line-height: 1.4; margin-top: auto; }
+
+    .workspace { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+    .topbar {
+      height: 56px;
+      min-height: 56px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: var(--panel);
+      gap: 10px;
+      z-index: 10;
+    }
+    .doc-title {
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .doc-title span { font-weight: 400; color: var(--muted); font-size: 12px; }
+    .doc-title .rename-inline-btn {
+      font-size: 11px;
+      padding: 2px 6px;
+      background: transparent;
+      border: 1px solid #48586c;
+      color: var(--muted);
+      border-radius: 4px;
+    }
+    .doc-title .rename-inline-btn:hover { color: #fff; border-color: #fff; }
+
+    .toolbar { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .toolbar .hint { color: var(--muted); font-size: 11px; margin-right: 4px; }
+
+    /* HOMEPAGE / BOOK DASHBOARD VIEW */
+    .dashboard-view {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      background: #0d1015;
+      padding: 24px;
+    }
+    .dash-hero {
+      background: linear-gradient(135deg, #1f2732 0%, #171d26 100%);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .dash-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-coral), var(--accent-teal), var(--accent-olive), var(--accent-purple));
+    }
+    .dash-hero h1 { margin: 0 0 6px; font-size: 22px; color: #fff; display: flex; align-items: center; gap: 10px; }
+    .dash-hero p { margin: 0 0 16px; color: var(--muted); font-size: 13px; }
+    .dash-stats { display: flex; gap: 16px; flex-wrap: wrap; }
+    .stat-badge {
+      background: #12161e;
+      border: 1px solid #2e3947;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .stat-badge strong { color: #fff; font-size: 15px; margin-right: 4px; }
+
+    .dash-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .dash-section-head h2 { font-size: 16px; margin: 0; color: #fff; }
+    
+    .chapters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .chapter-card {
+      background: #171e27;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+      position: relative;
+    }
+    .chapter-card:hover { transform: translateY(-2px); border-color: var(--accent-teal); box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
+    .chapter-card.active-chap { border-color: var(--accent-teal); background: #1a2330; }
+    .chapter-card-tag {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: #fff;
+      display: inline-block;
+      width: max-content;
+    }
+    .chapter-card h3 {
+      margin: 0;
+      font-size: 15px;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chapter-card-meta {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      gap: 12px;
+    }
+    .chapter-card-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: auto;
+      padding-top: 6px;
+      border-top: 1px solid #283444;
+    }
+    .chapter-card-actions button { flex: 1; font-size: 11px; padding: 5px 8px; }
+
+    /* VIEWER & PDF PAGES */
+    .viewer {
+      flex: 1;
+      min-height: 0;
+      overflow-y: scroll;
+      overflow-x: auto;
+      background: #0d1015;
+      padding: 20px 12px;
+      display: none;
+      touch-action: pan-x pan-y;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      scroll-behavior: smooth;
+    }
+    .viewer.active-view { display: block; }
+    .pages-container {
+      width: max-content;
+      min-width: 100%;
+      min-height: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 10px 20px 60px;
+      transition: width 0.12s ease-out;
+    }
+    
+    /* Page card with reordering banner */
+    .page-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #181f28;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+      overflow: hidden;
+    }
+    .page-header {
+      width: 100%;
+      background: #1d2531;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .page-header strong { color: var(--text); font-weight: 600; }
+    .page-header .order-tools { display: flex; align-items: center; gap: 4px; }
+    .page-header .order-tools button {
+      padding: 2px 7px;
+      font-size: 11px;
+      background: var(--panel2);
+      border-radius: 4px;
+    }
+
+    .page-wrap {
+      position: relative;
+      background: white;
+      user-select: none;
+    }
+    .page-wrap canvas { display: block; width: 100%; height: auto; }
+    .overlay { position: absolute; inset: 0; pointer-events: none; }
+
+    /* Tiny, exact ▶ button styling */
+    .place-button {
+      position: absolute;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 0;
+      color: var(--headphone-slate);
+      font-size: clamp(13px, 1.6vw, 22px);
+      font-weight: 800;
+      user-select: none;
+      cursor: grab;
+      touch-action: none;
+      z-index: 5;
+      line-height: 1;
+      padding: 4px;
+      transition: color 0.15s, transform 0.1s;
+    }
+    .place-button.selected { outline: 2px dashed var(--accent-teal); outline-offset: 3px; }
+    .place-button:active { cursor: grabbing; transform: scale(0.92); }
+    .place-button .grip {
+      position: absolute;
+      right: -5px;
+      bottom: -5px;
+      width: 9px;
+      height: 9px;
+      background: #fff;
+      border: 1px solid #090b0d;
+      border-radius: 50%;
+      display: none;
+      cursor: nwse-resize;
+    }
+    .place-button.selected .grip { display: block; }
+
+    /* Inline seekbar beside button */
+    .inline-seek {
+      position: absolute;
+      left: calc(100% + 6px);
+      top: 50%;
+      transform: translateY(-50%);
+      width: 105px;
+      height: 14px;
+      z-index: 60;
+      cursor: pointer;
+      touch-action: auto;
+      pointer-events: auto;
+      accent-color: var(--headphone-slate);
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
+      animation: fadeIn 0.15s ease-out;
+    }
+    @media (max-width: 600px) {
+      .inline-seek {
+        left: 50%;
+        top: calc(100% + 4px);
+        transform: translateX(-50%);
+        width: 85px;
+      }
+    }
+
+    .nav {
+      height: 44px;
+      min-height: 44px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--muted);
+      background: var(--panel);
+    }
+    .nav input {
+      width: 48px;
+      background: var(--panel2);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      color: var(--text);
+      padding: 3px 6px;
+      text-align: center;
+    }
+    .nav .zoom-display { font-size: 12px; font-weight: 600; color: var(--muted); min-width: 42px; text-align: center; }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-card {
+      background: #1b212a;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      width: min(720px, 95vw);
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+    }
+    .modal-head {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-head h3 { margin: 0; font-size: 16px; color: var(--text); }
+    .modal-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 12px;
+    }
+    .page-thumb-card {
+      background: #13171e;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+    .page-thumb-card canvas, .page-thumb-card img {
+      width: 100%;
+      height: auto;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .page-thumb-card .thumb-tools { display: flex; gap: 4px; width: 100%; }
+    .page-thumb-card .thumb-tools button { flex: 1; font-size: 11px; padding: 2px 4px; }
+    .modal-foot {
+      padding: 12px 18px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: #252e3b;
+      border: 1px solid var(--accent-teal);
+      color: #f0f4f8;
+      padding: 11px 16px;
+      border-radius: 7px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+      display: none;
+      z-index: 2000;
+      font-size: 13px;
+    }
+    .toast.show { display: block; animation: fadeIn 0.2s ease-out; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+      .sidebar { max-height: 45vh; border-right: 0; border-bottom: 1px solid var(--line); }
+      .topbar { padding: 0 12px; }
+      .toolbar .hint { display: none; }
+      .viewer { padding: 12px 6px; }
+    }
+  </style>
+</head>
+<body oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-tag">
+        <span class="icon-box">🔊</span>
+        <span class="title-box">한국어 표준교재</span>
+        <span class="lang-box">EPS-TOPIK</span>
+      </div>
+      <p>Multi-PDF Book Edition · Isolated Media Libraries</p>
+    </div>
+    
+    <div class="nav-tabs">
+      <div id="tabHome" class="nav-tab active" onclick="showDashboardView()">🏠 Book Overview</div>
+      <div id="tabStudio" class="nav-tab" onclick="showStudioView()">📖 Chapter Editor</div>
+    </div>
+    
+    <!-- CHAPTER PICKER & RENAME SECTION -->
+    <div class="section">
+      <h2>
+        <span>Current Chapter / PDF</span>
+        <button class="ghost" style="font-size:10px;" onclick="promptNewChapter()">+ Add Chapter</button>
+      </h2>
+      <div class="chapter-box">
+        <div class="chapter-title-row">
+          <strong id="sidebarChapterTitle">No Chapter Selected</strong>
+          <button class="ghost" title="Rename Chapter" onclick="renameCurrentChapter()">✏️</button>
+        </div>
+        <select id="chapterSelect" style="margin-top:7px;" onchange="switchChapter(this.value)">
+          <option value="">-- Select Chapter / PDF --</option>
+        </select>
+        <div class="chapter-actions">
+          <label class="button olive" style="text-align:center; cursor:pointer; font-size:11px;" for="pdfFileInput">📂 Load PDF</label>
+          <label class="button ghost" style="text-align:center; cursor:pointer; font-size:11px; border:1px solid var(--line);" for="batchPdfInput">📚 Batch PDFs</label>
+          <button class="ghost" onclick="openPageModal()">📑 Reorder</button>
+        </div>
+        <input id="pdfFileInput" type="file" accept="application/pdf" hidden>
+        <input id="batchPdfInput" type="file" accept="application/pdf" multiple hidden onchange="handleBatchPdfImport(this.files)">
+      </div>
+    </div>
+    
+    <!-- ISOLATED MEDIA LIBRARY FOR CURRENT CHAPTER -->
+    <div class="section media-panel">
+      <h2>
+        <span>Chapter Media (MP3)</span>
+        <span id="mediaCount" style="font-size:10px; color:var(--accent-teal);">0 files</span>
+      </h2>
+      <div class="row">
+        <label id="addAudio" class="button primary" style="text-align:center; cursor:pointer; font-size:11px;" for="audioInput">+ Add MP3</label>
+        <label class="button purple" style="text-align:center; cursor:pointer; font-size:10px; font-weight:700;" for="batchAudioInput" title="Auto-assigns audio to matching chapters">⚡ Auto-Route</label>
+        <button id="clearAllAudio" class="ghost" style="font-size:11px;">Clear</button>
+      </div>
+      <input id="audioInput" type="file" accept="audio/mp3,audio/mpeg,audio/*" multiple hidden>
+      <input id="batchAudioInput" type="file" accept="audio/mp3,audio/mpeg,audio/*" multiple hidden onchange="handleSmartAudioRouting(this.files)">
+      
+      <input id="audioSearch" placeholder="🔍 Search audio tracks (e.g. 32, Track 1)..." style="width:100%; padding:5px 8px; margin:7px 0 0; background:#13171e; border:1px solid var(--line); border-radius:5px; color:#fff; font-size:11px;" oninput="filterAudio(this.value)">
+
+      <div class="media-list-container">
+        <div id="mediaList" class="media-list">
+          <div class="empty">Add MP3 files for this chapter.</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>Audio Button Control</h2>
+      <div class="row">
+        <label>Interchangeable Mode
+          <select id="iconMode">
+            <option value="cycle_3state">Interchangeable (▶ Play ➔ Ⅱ Pause ➔ ■ Stop)</option>
+            <option value="toggle_pause">Interchangeable (▶ Play ⇄ Ⅱ Pause)</option>
+            <option value="toggle_stop">Interchangeable (▶ Play ⇄ ■ Stop)</option>
+            <option value="play_only">Fixed Play (▶)</option>
+            <option value="pause_only">Fixed Pause (Ⅱ)</option>
+            <option value="stop_only">Fixed Stop (■)</option>
+          </select>
+        </label>
+      </div>
+      <div class="row" style="margin-top:8px;">
+        <label>Color <input id="buttonColor" type="color" value="#484d56"></label>
+        <label>Size <input id="buttonSize" type="range" min="2" max="12" value="3.5" step="0.5"></label>
+      </div>
+      <div style="margin-top:8px;">
+        <span style="font-size:11px; color:var(--muted);">Textbook Section Colors:</span>
+        <div class="color-presets">
+          <button class="color-chip" style="background:#484d56;" title="Headphone Slate Gray" onclick="setPresetColor('#484d56')"></button>
+          <button class="color-chip" style="background:#090b0d;" title="Dark Charcoal Badge" onclick="setPresetColor('#090b0d')"></button>
+          <button class="color-chip" style="background:#e57088;" title="Coral Rose (Chapter 32)" onclick="setPresetColor('#e57088')"></button>
+          <button class="color-chip" style="background:#20b2aa;" title="Teal Mint (Culture & Info)" onclick="setPresetColor('#20b2aa')"></button>
+          <button class="color-chip" style="background:#8da336;" title="Olive Sage (Listening)" onclick="setPresetColor('#8da336')"></button>
+          <button class="color-chip" style="background:#6259b6;" title="Royal Purple (Pronunciation)" onclick="setPresetColor('#6259b6')"></button>
+          <button class="color-chip" style="background:#ffffff;" title="White" onclick="setPresetColor('#ffffff')"></button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      Korean EPS-TOPIK Multi-PDF Interactive Studio · Anti-Download Protected Offline Web Exporter.
+    </div>
+  </aside>
+  
+  <main class="workspace">
+    <header class="topbar">
+      <div id="docTitle" class="doc-title">
+        <span id="titleText">EPS-TOPIK Korean Textbook Overview</span>
+        <button class="rename-inline-btn" title="Rename" onclick="renameCurrentChapter()">Rename</button>
+      </div>
+      <div class="toolbar">
+        <button class="ghost" onclick="showDashboardView()">🏠 Book Home</button>
+        <button id="reorderBtn" class="olive" onclick="openPageModal()">📑 Fix Page Order</button>
+        <button id="removeButton" class="ghost">Remove Button</button>
+        <button id="exportZip" class="primary" title="Export current chapter">Export Chapter</button>
+        <button id="exportFullBook" class="coral" title="Export complete multi-chapter book">📚 Export Full Book</button>
+      </div>
+    </header>
+    
+    <!-- HOMEPAGE / BOOK OVERVIEW DASHBOARD -->
+    <section id="dashboardView" class="dashboard-view">
+      <div class="dash-hero">
+        <div class="brand-tag">
+          <span class="icon-box">🔊</span>
+          <span class="title-box">한국어 표준교재</span>
+          <span class="lang-box">EPS-TOPIK</span>
+        </div>
+        <h1>EPS-TOPIK Standard Textbook Studio</h1>
+        <p>Manage multiple chapter PDFs with separate MP3 audio libraries, fix page sequences, and export 100% offline interactive book players.</p>
+        <div class="dash-stats">
+          <div class="stat-badge"><strong id="statTotalChapters">0</strong> Chapters</div>
+          <div class="stat-badge"><strong id="statTotalAudio">0</strong> Audio Tracks</div>
+          <div class="stat-badge"><strong id="statTotalButtons">0</strong> Interactive Buttons</div>
+        </div>
+      </div>
+      
+      <div class="dash-section-head">
+        <div>
+          <h2 style="margin:0 0 2px;">📖 Textbook Chapters (Table of Contents)</h2>
+          <span style="font-size:11px; color:var(--muted);">Select or search any chapter to edit or place audio buttons</span>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <input id="chapterSearch" placeholder="🔍 Filter chapters / lessons (e.g. 32, Preliminary)..." style="width:230px; padding:6px 10px; background:#13171e; border:1px solid var(--line); border-radius:6px; color:#fff; font-size:12px;" oninput="filterChapters(this.value)">
+          <label class="button olive" style="cursor:pointer; padding:6px 11px; font-weight:700; font-size:12px;" for="batchPdfInput">📚 Batch Import PDFs</label>
+          <button class="primary" onclick="promptNewChapter()">+ Add Chapter</button>
+          <button class="coral" onclick="exportFullBookZip()">📚 Export Book (ZIP)</button>
+        </div>
+      </div>
+      
+      <div id="chaptersGrid" class="chapters-grid">
+        <!-- Dynamic Chapter Cards -->
+      </div>
+    </section>
+
+    <!-- STUDIO PDF VIEWER -->
+    <section id="viewer" class="viewer">
+      <div id="pagesContainer" class="pages-container"></div>
+    </section>
+    
+    <nav id="bottomNav" class="nav" style="display:none;">
+      <button id="zoomOut" class="icon" title="Zoom out">-</button>
+      <span id="zoomLabel" class="zoom-display">125%</span>
+      <button id="zoomIn" class="icon" title="Zoom in">+</button>
+      <span style="margin: 0 4px; color: var(--line);">|</span>
+      <button id="prev" class="icon" title="Previous page">‹</button>
+      <span>Page <input id="pageNo" value="1" inputmode="numeric"> of <span id="pageCount">0</span></span>
+      <button id="next" class="icon" title="Next page">›</button>
+      <button id="zoomReset" class="icon" title="Reset Zoom" style="font-size:12px; font-weight:bold;">100%</button>
+    </nav>
+  </main>
+</div>
+
+<!-- PAGE SEQUENCE / REORDER MODAL -->
+<div id="sequenceModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <h3 style="margin:0 0 4px;">📑 Fix Page Sequence (Reorder Pages)</h3>
+        <span style="font-size:11px; color:var(--muted);">Drag thumbnails to rearrange, or use quick un-shuffle buttons below:</span>
+      </div>
+      <button onclick="closePageModal()">✕</button>
+    </div>
+    <div style="padding: 8px 16px; background:#161c24; border-bottom:1px solid var(--line); display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+      <button class="olive" style="font-size:11px; padding:4px 8px;" onclick="unshuffleDuplex()">⚡ Un-shuffle Duplex Scan (Odd/Even)</button>
+      <button class="ghost" style="font-size:11px; padding:4px 8px;" onclick="reversePageOrder()">🔄 Reverse Order</button>
+      <button class="ghost" style="font-size:11px; padding:4px 8px;" onclick="resetPageOrder()">Reset Original</button>
+      <div style="display:flex; align-items:center; gap:4px; margin-left:auto;">
+        <span style="font-size:11px; color:var(--muted);">Custom Order:</span>
+        <input id="customOrderInput" placeholder="e.g. 1,4,2,3" style="width:110px; background:var(--panel2); border:1px solid var(--line); border-radius:4px; color:#fff; font-size:11px; padding:3px 6px;">
+        <button class="primary" style="font-size:11px; padding:3px 8px;" onclick="applyCustomOrderInput()">Apply</button>
+      </div>
+    </div>
+    <div class="modal-body" id="modalPageThumbs">
+      <!-- Thumbnail cards populated dynamically with drag & drop -->
+    </div>
+    <div class="modal-foot">
+      <button class="ghost" onclick="resetPageOrder()">Reset</button>
+      <button class="primary" onclick="closePageModal()">Apply & Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="vendor/jszip.min.js"></script>
+<script type="module">
+  import * as pdfjsLib from './vendor/pdf.mjs';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.mjs';
+
+  const $ = id => document.getElementById(id);
+  
+  // --- MULTI-PDF BOOK DATA STRUCTURE ---
+  const book = {
+    title: "EPS-TOPIK Korean Standard Textbook",
+    activeChapterId: null,
+    chapters: [
+      {
+        id: "chap-prelim",
+        title: "예비편 (Preliminary Chapter)",
+        category: "기초 (Basics)",
+        color: "#20b2aa",
+        pdfFile: null,
+        pdfBytes: null,
+        pdfDoc: null,
+        pageOrder: [],
+        media: [],
+        buttons: []
+      },
+      {
+        id: "chap-32",
+        title: "제32과: 회사 시설 이용 (Chapter 32: Using Workplace Facilities)",
+        category: "직장 생활 (Workplace Life)",
+        color: "#e57088",
+        pdfFile: null,
+        pdfBytes: null,
+        pdfDoc: null,
+        pageOrder: [],
+        media: [],
+        buttons: []
+      }
+    ]
+  };
+
+  let scale = 1.25, renderedScale = scale, selectedMedia = null, selectedButton = null;
+  let placeMode = false;
+  const activePlayers = new Map();
+
+  function getActiveChapter() {
+    return book.chapters.find(c => c.id === book.activeChapterId) || null;
+  }
+
+  function toast(s) {
+    $('toast').textContent = s;
+    $('toast').classList.add('show');
+    clearTimeout(toast._tm);
+    toast._tm = setTimeout(() => $('toast').classList.remove('show'), 2600);
+  }
+
+  function fmt(n) {
+    return n < 1024 ? `${n} B` : `${(n / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  function updateZoomLabel() {
+    $('zoomLabel').textContent = Math.round(scale * 100) + '%';
+  }
+
+  window.setPresetColor = function(color) {
+    $('buttonColor').value = color;
+    updateSelectedControl();
+    toast('Color set to ' + color);
+  };
+
+  // --- VIEW SWITCHING ---
+  window.showDashboardView = function() {
+    $('dashboardView').style.display = 'block';
+    $('viewer').classList.remove('active-view');
+    $('bottomNav').style.display = 'none';
+    $('tabHome').classList.add('active');
+    $('tabStudio').classList.remove('active');
+    $('titleText').textContent = book.title + " · Overview";
+    renderDashboard();
+  };
+
+  window.showStudioView = function() {
+    const ch = getActiveChapter();
+    if (!ch || !ch.pdfDoc) {
+      if (book.chapters.length > 0) {
+        switchChapter(book.chapters[0].id);
+      }
+    }
+    $('dashboardView').style.display = 'none';
+    $('viewer').classList.add('active-view');
+    $('bottomNav').style.display = 'flex';
+    $('tabHome').classList.remove('active');
+    $('tabStudio').classList.add('active');
+    updateHeaderTitle();
+    renderAllPages();
+  };
+
+  function updateHeaderTitle() {
+    const ch = getActiveChapter();
+    if (ch) {
+      $('titleText').textContent = ch.title;
+      $('sidebarChapterTitle').textContent = ch.title;
+    } else {
+      $('titleText').textContent = book.title;
+      $('sidebarChapterTitle').textContent = 'No Chapter Selected';
+    }
+  }
+
+  // --- SEARCH & FILTER HELPERS ---
+  let chapterFilterQuery = '';
+  let audioFilterQuery = '';
+
+  window.filterChapters = function(q) {
+    chapterFilterQuery = (q || '').toLowerCase().trim();
+    renderDashboard();
+  };
+
+  window.filterAudio = function(q) {
+    audioFilterQuery = (q || '').toLowerCase().trim();
+    renderMedia();
+  };
+
+  // --- DASHBOARD RENDERING (SUPPORTS 100+ CHAPTERS) ---
+  function renderDashboard() {
+    const grid = $('chaptersGrid');
+    grid.innerHTML = '';
+    
+    let totalAudio = 0;
+    let totalButtons = 0;
+
+    const filtered = book.chapters.filter(ch => {
+      if (!chapterFilterQuery) return true;
+      return ch.title.toLowerCase().includes(chapterFilterQuery) || (ch.category && ch.category.toLowerCase().includes(chapterFilterQuery));
+    });
+
+    book.chapters.forEach(ch => {
+      totalAudio += ch.media.length;
+      totalButtons += ch.buttons.length;
+    });
+
+    if (!filtered.length) {
+      grid.innerHTML = '<div style="grid-column:1/-1; padding:30px; text-align:center; color:var(--muted);">No matching chapters found.</div>';
+    } else {
+      filtered.forEach((ch, idx) => {
+        const card = document.createElement('div');
+        card.className = 'chapter-card' + (book.activeChapterId === ch.id ? ' active-chap' : '');
+        
+        const tagColor = ch.color || '#e57088';
+        const pagesCount = ch.pageOrder ? ch.pageOrder.length : (ch.pdfDoc ? ch.pdfDoc.numPages : 0);
+
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="chapter-card-tag" style="background:${tagColor};">${ch.category || 'Chapter ' + (idx + 1)}</span>
+            <span style="font-size:11px; color:var(--muted);">${pagesCount > 0 ? pagesCount + ' Pages' : 'No PDF'}</span>
+          </div>
+          <h3 title="${ch.title}">📖 ${ch.title}</h3>
+          <div class="chapter-card-meta">
+            <span>🎵 ${ch.media.length} Audio</span>
+            <span>▶ ${ch.buttons.length} Buttons</span>
+          </div>
+          <div class="chapter-card-actions">
+            <button class="primary" onclick="openChapterDirect('${ch.id}')">${ch.pdfDoc || ch.pdfBytes ? 'Open Studio' : '📂 Load PDF'}</button>
+            <button class="ghost" onclick="renameChapterById('${ch.id}')">✏️ Rename</button>
+            <button class="ghost" style="color:var(--danger);" onclick="deleteChapterById('${ch.id}')">🗑</button>
+          </div>
+        `;
+        grid.append(card);
+      });
+    }
+
+    $('statTotalChapters').textContent = book.chapters.length;
+    $('statTotalAudio').textContent = totalAudio;
+    $('statTotalButtons').textContent = totalButtons;
+    updateChapterSelectDropdown();
+  }
+
+  function updateChapterSelectDropdown() {
+    const sel = $('chapterSelect');
+    sel.innerHTML = '<option value="">-- Select Chapter / PDF --</option>';
+    book.chapters.forEach(ch => {
+      const opt = document.createElement('option');
+      opt.value = ch.id;
+      opt.textContent = ch.title;
+      if (book.activeChapterId === ch.id) opt.selected = true;
+      sel.append(opt);
+    });
+  }
+
+  window.openChapterDirect = function(chapterId) {
+    switchChapter(chapterId);
+    const ch = getActiveChapter();
+    if (!ch.pdfDoc && !ch.pdfBytes) {
+      $('pdfFileInput').click();
+    } else {
+      showStudioView();
+    }
+  };
+
+  window.promptNewChapter = function() {
+    const name = prompt("Enter Chapter Title (e.g., Chapter 1: 안녕하세요):", `Chapter ${book.chapters.length + 1}`);
+    if (!name || !name.trim()) return;
+    const colors = ["#e57088", "#20b2aa", "#8da336", "#6259b6", "#252b36"];
+    const newChap = {
+      id: "chap-" + crypto.randomUUID().slice(0, 8),
+      title: name.trim(),
+      category: `Lesson ${book.chapters.length + 1}`,
+      color: colors[book.chapters.length % colors.length],
+      pdfFile: null,
+      pdfBytes: null,
+      pdfDoc: null,
+      pageOrder: [],
+      media: [],
+      buttons: []
+    };
+    book.chapters.push(newChap);
+    switchChapter(newChap.id);
+    renderDashboard();
+    toast(`Created "${newChap.title}"`);
+    $('pdfFileInput').click();
+  };
+
+  // --- BATCH MULTI-PDF IMPORT (50+ PDFs AT ONCE) ---
+  window.handleBatchPdfImport = async function(files) {
+    if (!files || !files.length) return;
+    toast(`Importing ${files.length} PDF chapters...`);
+    const colors = ["#e57088", "#20b2aa", "#8da336", "#6259b6", "#252b36"];
+    
+    // Sort files alphabetically for clean sequential chapter ordering
+    const sortedFiles = Array.from(files).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+
+    for (let i = 0; i < sortedFiles.length; i++) {
+      const file = sortedFiles[i];
+      const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      let doc = null;
+      let pageCount = 0;
+      try {
+        doc = await pdfjsLib.getDocument({ data: new Uint8Array(bytes) }).promise;
+        pageCount = doc.numPages;
+      } catch (e) {
+        console.warn('Deferred doc parse for', cleanName);
+      }
+
+      const chapter = {
+        id: "chap-" + crypto.randomUUID().slice(0, 8),
+        title: cleanName,
+        category: `Chapter ${book.chapters.length + 1}`,
+        color: colors[(book.chapters.length) % colors.length],
+        pdfFile: file,
+        pdfBytes: bytes,
+        pdfDoc: doc,
+        pageOrder: pageCount ? Array.from({ length: pageCount }, (_, k) => k + 1) : [],
+        media: [],
+        buttons: []
+      };
+      book.chapters.push(chapter);
+    }
+
+    if (book.chapters.length > 0 && !book.activeChapterId) {
+      book.activeChapterId = book.chapters[0].id;
+    }
+    renderDashboard();
+    toast(`Successfully imported ${sortedFiles.length} PDF chapters!`);
+  };
+
+  // --- SMART AUDIO AUTO-ROUTING (SORTS 100+ MP3s TO CORRESPONDING CHAPTERS) ---
+  window.handleSmartAudioRouting = function(files) {
+    if (!files || !files.length) return;
+    let routedCount = 0;
+    const fileArr = Array.from(files);
+
+    fileArr.forEach(file => {
+      const fn = file.name.toLowerCase();
+      // Look for numbers or chapter indicators
+      let matchedChapter = null;
+      for (const ch of book.chapters) {
+        const ct = ch.title.toLowerCase();
+        const numMatch = ct.match(/\d+/);
+        if (numMatch && fn.includes(numMatch[0])) {
+          matchedChapter = ch;
+          break;
+        }
+      }
+      if (!matchedChapter) {
+        matchedChapter = getActiveChapter() || book.chapters[0];
+      }
+      if (matchedChapter) {
+        matchedChapter.media.push({
+          id: crypto.randomUUID(),
+          file,
+          name: file.name,
+          size: file.size,
+          type: 'audio',
+          mime: file.type || 'audio/mpeg'
+        });
+        routedCount++;
+      }
+    });
+
+    renderDashboard();
+    renderMedia();
+    toast(`Auto-routed ${routedCount} audio tracks across chapters!`);
+  };
+
+  window.renameCurrentChapter = function() {
+    const ch = getActiveChapter();
+    if (!ch) return toast('Please select a chapter first');
+    renameChapterById(ch.id);
+  };
+
+  window.renameChapterById = function(chapterId) {
+    const ch = book.chapters.find(c => c.id === chapterId);
+    if (!ch) return;
+    const newName = prompt("Rename Chapter:", ch.title);
+    if (newName && newName.trim()) {
+      ch.title = newName.trim();
+      updateHeaderTitle();
+      renderDashboard();
+      toast(`Renamed to "${ch.title}"`);
+    }
+  };
+
+  window.deleteChapterById = function(chapterId) {
+    if (book.chapters.length <= 1) return toast("Cannot delete the only chapter.");
+    if (!confirm("Are you sure you want to delete this chapter?")) return;
+    book.chapters = book.chapters.filter(c => c.id !== chapterId);
+    if (book.activeChapterId === chapterId) {
+      book.activeChapterId = book.chapters[0].id;
+    }
+    renderDashboard();
+    renderMedia();
+    renderAllPages();
+    toast("Chapter deleted");
+  };
+
+  window.switchChapter = async function(chapterId) {
+    if (!chapterId) return;
+    book.activeChapterId = chapterId;
+    selectedMedia = null;
+    selectedButton = null;
+    const ch = getActiveChapter();
+    updateHeaderTitle();
+    updateChapterSelectDropdown();
+    renderMedia();
+    
+    if (ch) {
+      // Lazy load PDF doc if bytes exist but doc is not yet instantiated
+      if (!ch.pdfDoc && ch.pdfBytes) {
+        ch.pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(ch.pdfBytes) }).promise;
+        if (!ch.pageOrder.length) {
+          ch.pageOrder = Array.from({ length: ch.pdfDoc.numPages }, (_, i) => i + 1);
+        }
+      }
+      if (ch.pdfDoc) {
+        $('pageCount').textContent = ch.pageOrder.length;
+        renderAllPages();
+      } else {
+        $('pagesContainer').innerHTML = '<div style="color:var(--muted); padding:40px; text-align:center;">No PDF loaded for this chapter.<br><button class="primary" style="margin-top:10px;" onclick="$(\'pdfFileInput\').click()">📂 Open PDF for ' + ch.title + '</button></div>';
+      }
+    }
+  };
+
+  // --- ISOLATED CHAPTER MEDIA MANAGEMENT WITH INSTANT SEARCH FILTER ---
+  function renderMedia() {
+    const list = $('mediaList');
+    list.innerHTML = '';
+    const ch = getActiveChapter();
+    if (!ch) return;
+
+    $('mediaCount').textContent = `${ch.media.length} file${ch.media.length === 1 ? '' : 's'}`;
+
+    if (!ch.media.length) {
+      list.innerHTML = `<div class="empty">No MP3 audio for <b>${ch.title}</b>.<br>Click <b>+ Add MP3</b> to add tracks.</div>`;
+      return;
+    }
+
+    const filteredMedia = ch.media.filter(m => {
+      if (!audioFilterQuery) return true;
+      return m.name.toLowerCase().includes(audioFilterQuery);
+    });
+
+    if (!filteredMedia.length) {
+      list.innerHTML = '<div class="empty">No tracks match your search.</div>';
+      return;
+    }
+
+    filteredMedia.forEach((m, idx) => {
+      const row = document.createElement('div');
+      row.draggable = true;
+      row.addEventListener('dragstart', e => e.dataTransfer.setData('text/media-id', m.id));
+      row.className = 'media-row' + (selectedMedia === m.id ? ' selected' : '');
+
+      const audioPreview = document.createElement('audio');
+      audioPreview.preload = 'none';
+      audioPreview.src = URL.createObjectURL(m.file);
+
+      const playBtn = document.createElement('button');
+      playBtn.className = 'play-btn';
+      playBtn.textContent = '▶';
+      playBtn.title = 'Preview Audio';
+      playBtn.onclick = e => {
+        e.stopPropagation();
+        if (!audioPreview.paused) {
+          audioPreview.pause();
+          playBtn.textContent = '▶';
+        } else {
+          document.querySelectorAll('audio').forEach(a => a.pause());
+          document.querySelectorAll('.media-row .play-btn').forEach(b => b.textContent = '▶');
+          audioPreview.play();
+          playBtn.textContent = 'Ⅱ';
+        }
+      };
+      audioPreview.addEventListener('ended', () => { playBtn.textContent = '▶'; });
+
+      const titleCol = document.createElement('div');
+      titleCol.className = 'title-col';
+      titleCol.innerHTML = `<strong>♪ ${m.name}</strong><span>MP3 · ${fmt(m.size)}</span>`;
+
+      const placeBtn = document.createElement('button');
+      placeBtn.className = 'place-action';
+      placeBtn.textContent = 'Place ▶';
+      placeBtn.onclick = e => {
+        e.stopPropagation();
+        selectedMedia = m.id;
+        placeMode = true;
+        if (selectedButton) {
+          const b = ch.buttons.find(x => x.id === selectedButton);
+          if (b) {
+            b.mediaId = m.id;
+            b.state = 'stopped';
+            toast('Updated selected button to play ' + m.name);
+            renderAllButtons();
+          }
+        } else {
+          toast('Click anywhere on a PDF page to place ▶.');
+        }
+        renderMedia();
+      };
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'del-btn';
+      delBtn.textContent = '✕';
+      delBtn.title = 'Remove';
+      delBtn.onclick = e => {
+        e.stopPropagation();
+        removeSpecificAudio(m.id);
+      };
+
+      row.onclick = () => {
+        selectedMedia = m.id;
+        renderMedia();
+      };
+
+      row.append(playBtn, titleCol, placeBtn, delBtn);
+      list.append(row);
+    });
+  }
+
+  function removeSpecificAudio(mediaId) {
+    const ch = getActiveChapter();
+    if (!ch) return;
+    const old = ch.media.find(m => m.id === mediaId);
+    if (!old) return;
+    ch.buttons = ch.buttons.filter(b => b.mediaId !== mediaId);
+    ch.media = ch.media.filter(m => m.id !== mediaId);
+    if (selectedMedia === mediaId) selectedMedia = null;
+    renderMedia();
+    renderAllButtons();
+    toast(`${old.name} removed`);
+  }
+
+  async function loadPdfForCurrentChapter(file) {
+    const ch = getActiveChapter();
+    if (!ch) return;
+    try {
+      ch.pdfFile = file;
+      ch.pdfBytes = new Uint8Array(await file.arrayBuffer());
+      ch.pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(ch.pdfBytes) }).promise;
+      ch.pageOrder = Array.from({ length: ch.pdfDoc.numPages }, (_, i) => i + 1);
+      $('pageCount').textContent = ch.pageOrder.length;
+      showStudioView();
+      toast(`Loaded PDF (${ch.pdfDoc.numPages} pages) for ${ch.title}`);
+    } catch (err) {
+      console.error(err);
+      toast('Error loading PDF: ' + err.message);
+    }
+  }
+
+  // --- HIGH-PERFORMANCE 60 FPS ZERO-LAG PAGE RENDERING ---
+  let currentRenderSeq = 0;
+  const BASE_RENDER_SCALE = 1.6;
+
+  async function renderAllPages() {
+    const ch = getActiveChapter();
+    if (!ch || !ch.pdfDoc) return;
+    const renderSeq = ++currentRenderSeq;
+    const viewer = $('viewer');
+    const oldTop = viewer.scrollTop, oldLeft = viewer.scrollLeft, ratio = scale / (renderedScale || scale);
+    const container = $('pagesContainer');
+    
+    // Synchronously pre-allocate ALL cards in fixed sequential order
+    container.innerHTML = '';
+    updateZoomLabel();
+
+    const pageSkeletons = [];
+
+    for (let seqIdx = 0; seqIdx < ch.pageOrder.length; seqIdx++) {
+      const origPageNum = ch.pageOrder[seqIdx];
+      const displayPageNum = seqIdx + 1;
+
+      const card = document.createElement('div');
+      card.className = 'page-card';
+      card.id = `page-card-${displayPageNum}`;
+      card.dataset.seq = displayPageNum;
+      card.dataset.origPage = origPageNum;
+
+      const header = document.createElement('div');
+      header.className = 'page-header';
+      header.innerHTML = `
+        <div><strong>Page ${displayPageNum}</strong> <span style="font-size:11px;">(Original #${origPageNum})</span></div>
+        <div class="order-tools">
+          <button title="Move Up" onclick="movePageInOrder(${seqIdx}, ${seqIdx - 1})">▲ Up</button>
+          <button title="Move Down" onclick="movePageInOrder(${seqIdx}, ${seqIdx + 1})">▼ Down</button>
+        </div>
+      `;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'page-wrap';
+      wrap.dataset.origPage = origPageNum;
+
+      const c = document.createElement('canvas');
+      c.style.width = '100%';
+      c.style.height = '100%';
+      c.style.display = 'block';
+
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay';
+      wrap.append(c, overlay);
+
+      wrap.addEventListener('dragover', e => e.preventDefault());
+      wrap.addEventListener('drop', e => {
+        const mediaId = e.dataTransfer.getData('text/media-id');
+        if (mediaId) placeControlFromEvent(e, wrap, mediaId);
+      });
+
+      wrap.addEventListener('click', e => {
+        if (placeMode && selectedMedia) {
+          placeControlFromEvent(e, wrap, selectedMedia);
+        }
+      });
+
+      card.append(header, wrap);
+      container.append(card);
+      pageSkeletons.push({ origPageNum, seqIdx, wrap, canvas: c });
+    }
+
+    // Render crisp high-DPI rasterization once into pre-allocated placeholders
+    for (const item of pageSkeletons) {
+      if (renderSeq !== currentRenderSeq) return; // Abort obsolete render
+      const p = await ch.pdfDoc.getPage(item.origPageNum);
+      if (renderSeq !== currentRenderSeq) return;
+      const vp = p.getViewport({ scale: BASE_RENDER_SCALE });
+
+      item.wrap._baseWidth = vp.width;
+      item.wrap._baseHeight = vp.height;
+
+      // Apply initial zoom dimensions via CSS
+      const zoomRatio = scale / BASE_RENDER_SCALE;
+      item.wrap.style.width = (vp.width * zoomRatio) + 'px';
+      item.wrap.style.height = (vp.height * zoomRatio) + 'px';
+
+      item.canvas.width = vp.width;
+      item.canvas.height = vp.height;
+
+      await p.render({ canvasContext: item.canvas.getContext('2d'), viewport: vp }).promise;
+      if (renderSeq !== currentRenderSeq) return;
+    }
+
+    renderAllButtons();
+    viewer.scrollTop = oldTop * ratio;
+    viewer.scrollLeft = oldLeft * ratio;
+    renderedScale = scale;
+  }
+
+  function applyZoomCSS() {
+    updateZoomLabel();
+    const zoomRatio = scale / BASE_RENDER_SCALE;
+    document.querySelectorAll('.page-wrap').forEach(wrap => {
+      if (wrap._baseWidth) {
+        wrap.style.width = (wrap._baseWidth * zoomRatio) + 'px';
+        wrap.style.height = (wrap._baseHeight * zoomRatio) + 'px';
+      }
+    });
+  }
+
+  // --- REORDER MODAL ---
+  window.openPageModal = function() {
+    const ch = getActiveChapter();
+    if (!ch || !ch.pdfDoc) return toast('Please open a PDF chapter first');
+    renderPageThumbsModal();
+    $('sequenceModal').classList.add('active');
+  };
+
+  window.closePageModal = function() {
+    $('sequenceModal').classList.remove('active');
+    renderAllPages();
+  };
+
+  window.resetPageOrder = function() {
+    const ch = getActiveChapter();
+    if (!ch || !ch.pdfDoc) return;
+    ch.pageOrder = Array.from({ length: ch.pdfDoc.numPages }, (_, i) => i + 1);
+    renderPageThumbsModal();
+    renderAllPages();
+    toast('Page order reset to original sequence');
+  };
+
+  window.reversePageOrder = function() {
+    const ch = getActiveChapter();
+    if (!ch || !ch.pageOrder.length) return;
+    ch.pageOrder.reverse();
+    renderPageThumbsModal();
+    renderAllPages();
+    toast('Reversed page order');
+  };
+
+  window.unshuffleDuplex = function() {
+    const ch = getActiveChapter();
+    if (!ch || ch.pageOrder.length < 2) return;
+    const n = ch.pageOrder.length;
+    const mid = Math.ceil(n / 2);
+    const odds = ch.pageOrder.slice(0, mid);
+    const evens = ch.pageOrder.slice(mid);
+    const result = [];
+    for (let i = 0; i < mid; i++) {
+      if (i < odds.length) result.push(odds[i]);
+      if (i < evens.length) result.push(evens[i]);
+    }
+    ch.pageOrder = result;
+    renderPageThumbsModal();
+    renderAllPages();
+    toast('Interlaced odd/even duplex pages');
+  };
+
+  window.applyCustomOrderInput = function() {
+    const ch = getActiveChapter();
+    if (!ch) return;
+    const raw = ($('customOrderInput')?.value || '').trim();
+    if (!raw) return toast('Enter page numbers separated by commas');
+    const parts = raw.split(/[\s,]+/).map(x => parseInt(x, 10)).filter(x => !isNaN(x) && x >= 1 && x <= ch.pdfDoc.numPages);
+    if (!parts.length) return toast('Invalid page numbers');
+    const remaining = ch.pageOrder.filter(p => !parts.includes(p));
+    ch.pageOrder = [...parts, ...remaining];
+    renderPageThumbsModal();
+    renderAllPages();
+    toast('Applied custom page sequence');
+  };
+
+  window.movePageInOrder = function(fromIndex, toIndex) {
+    const ch = getActiveChapter();
+    if (!ch || toIndex < 0 || toIndex >= ch.pageOrder.length) return;
+    const item = ch.pageOrder.splice(fromIndex, 1)[0];
+    ch.pageOrder.splice(toIndex, 0, item);
+    renderPageThumbsModal();
+    renderAllPages();
+    toast(`Moved page to position ${toIndex + 1}`);
+  };
+
+  async function renderPageThumbsModal() {
+    const ch = getActiveChapter();
+    const modalBody = $('modalPageThumbs');
+    modalBody.innerHTML = '<div style="color:var(--muted); padding:10px;">Generating thumbnails...</div>';
+
+    const thumbCards = [];
+    for (let seqIdx = 0; seqIdx < ch.pageOrder.length; seqIdx++) {
+      const origPageNum = ch.pageOrder[seqIdx];
+      const displayPageNum = seqIdx + 1;
+      const p = await ch.pdfDoc.getPage(origPageNum);
+      const vp = p.getViewport({ scale: 0.25 });
+
+      const thumbCanvas = document.createElement('canvas');
+      thumbCanvas.width = vp.width;
+      thumbCanvas.height = vp.height;
+      await p.render({ canvasContext: thumbCanvas.getContext('2d'), viewport: vp }).promise;
+
+      const card = document.createElement('div');
+      card.className = 'page-thumb-card';
+      card.draggable = true;
+      card.style.cursor = 'grab';
+      card.innerHTML = `
+        <div style="font-size:11px; font-weight:700; color:#fff;">Page ${displayPageNum} <span style="font-size:10px; color:var(--muted);">(${origPageNum})</span></div>
+      `;
+      card.append(thumbCanvas);
+
+      card.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', String(seqIdx));
+      });
+      card.addEventListener('dragover', e => {
+        e.preventDefault();
+        card.style.borderColor = 'var(--accent-teal)';
+      });
+      card.addEventListener('dragleave', () => {
+        card.style.borderColor = 'var(--line)';
+      });
+      card.addEventListener('drop', e => {
+        e.preventDefault();
+        card.style.borderColor = 'var(--line)';
+        const fromIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        if (!isNaN(fromIdx) && fromIdx !== seqIdx) {
+          movePageInOrder(fromIdx, seqIdx);
+        }
+      });
+
+      const tools = document.createElement('div');
+      tools.className = 'thumb-tools';
+      tools.innerHTML = `
+        <button onclick="movePageInOrder(${seqIdx}, ${seqIdx - 1})">◀</button>
+        <button onclick="movePageInOrder(${seqIdx}, ${seqIdx + 1})">▶</button>
+      `;
+      card.append(tools);
+      thumbCards.push(card);
+    }
+
+    modalBody.innerHTML = '';
+    thumbCards.forEach(c => modalBody.append(c));
+  }
+
+  // --- BUTTON PLACEMENT & PLAYBACK ---
+  function placeControlFromEvent(e, wrap, mediaId) {
+    const ch = getActiveChapter();
+    if (!ch || e.target.closest('.place-button')) return;
+    const rect = wrap.getBoundingClientRect();
+    const x = Math.max(0, Math.min(0.96, (e.clientX - rect.left) / rect.width - 0.015));
+    const y = Math.max(0, Math.min(0.96, (e.clientY - rect.top) / rect.height - 0.015));
+    const size = (+($('buttonSize').value) || 3.5) / 100;
+    const id = crypto.randomUUID();
+
+    ch.buttons.push({
+      id,
+      page: +wrap.dataset.origPage,
+      x,
+      y,
+      w: size,
+      h: size,
+      mediaId,
+      label: 'Audio button',
+      state: 'stopped',
+      iconMode: $('iconMode').value || 'cycle_3state',
+      color: $('buttonColor').value || '#484d56'
+    });
+
+    selectedButton = id;
+    selectedMedia = mediaId;
+    placeMode = false;
+    renderAllButtons();
+    toast('Tiny ▶ placed on page');
+  }
+
+  function getButtonGlyph(b) {
+    const mode = b.iconMode || 'cycle_3state';
+    if (mode === 'play_only') return '▶';
+    if (mode === 'pause_only') return 'Ⅱ';
+    if (mode === 'stop_only') return '■';
+    if (mode === 'toggle_stop') return (b.state === 'playing') ? '■' : '▶';
+    if (mode === 'toggle_pause') return (b.state === 'playing') ? 'Ⅱ' : '▶';
+    if (b.state === 'playing') return 'Ⅱ';
+    if (b.state === 'paused') return '■';
+    return '▶';
+  }
+
+  function stopOtherPlayers(exceptId) {
+    const ch = getActiveChapter();
+    activePlayers.forEach((player, id) => {
+      if (id !== exceptId) {
+        player.pause();
+        player.currentTime = 0;
+        if (ch) {
+          const other = ch.buttons.find(b => b.id === id);
+          if (other) other.state = 'stopped';
+        }
+      }
+    });
+  }
+
+  function activateMedia(b) {
+    const ch = getActiveChapter();
+    if (!ch) return;
+    const m = ch.media.find(x => x.id === b.mediaId);
+    if (!m) return toast('Audio file not loaded');
+
+    let player = activePlayers.get(b.id);
+    if (!player) {
+      player = document.createElement('audio');
+      player.src = URL.createObjectURL(m.file);
+      player.preload = 'auto';
+      document.body.append(player);
+      activePlayers.set(b.id, player);
+
+      player.addEventListener('play', () => {
+        stopOtherPlayers(b.id);
+        b.state = 'playing';
+        renderAllButtons();
+      });
+      player.addEventListener('pause', () => {
+        if (b.state === 'playing') b.state = 'paused';
+        renderAllButtons();
+      });
+      player.addEventListener('ended', () => {
+        player.currentTime = 0;
+        b.state = 'stopped';
+        renderAllButtons();
+      });
+    }
+
+    const mode = b.iconMode || 'cycle_3state';
+    if (mode === 'cycle_3state') {
+      if (b.state === 'playing' && !player.paused) {
+        player.pause();
+        b.state = 'paused';
+      } else if (b.state === 'paused') {
+        player.pause();
+        player.currentTime = 0;
+        b.state = 'stopped';
+      } else {
+        stopOtherPlayers(b.id);
+        player.play().catch(() => toast('Click ▶ again to allow playback'));
+        b.state = 'playing';
+      }
+    } else if (mode === 'toggle_stop') {
+      if (!player.paused) {
+        player.pause();
+        player.currentTime = 0;
+        b.state = 'stopped';
+      } else {
+        stopOtherPlayers(b.id);
+        player.play().catch(() => toast('Click ▶ again to allow playback'));
+        b.state = 'playing';
+      }
+    } else if (mode === 'toggle_pause') {
+      if (!player.paused) {
+        player.pause();
+        b.state = 'stopped';
+      } else {
+        stopOtherPlayers(b.id);
+        player.play().catch(() => toast('Click ▶ again to allow playback'));
+        b.state = 'playing';
+      }
+    }
+    renderAllButtons();
+  }
+
+  function renderAllButtons() {
+    const ch = getActiveChapter();
+    if (!ch) return;
+
+    document.querySelectorAll('.page-wrap').forEach(wrap => {
+      const origPageNum = +wrap.dataset.origPage;
+      const overlay = wrap.querySelector('.overlay');
+      if (!overlay) return;
+      overlay.innerHTML = '';
+
+      ch.buttons.filter(b => b.page === origPageNum).forEach(b => {
+        const el = document.createElement('div');
+        el.className = 'place-button' + (selectedButton === b.id ? ' selected' : '');
+        el.style.left = (b.x * 100) + '%';
+        el.style.top = (b.y * 100) + '%';
+        el.style.width = (b.w * 100) + '%';
+        el.style.height = (b.h * 100) + '%';
+        el.style.color = b.color || '#484d56';
+        el.textContent = getButtonGlyph(b);
+
+        const grip = document.createElement('i');
+        grip.className = 'grip';
+        el.append(grip);
+
+        el.onclick = e => {
+          e.stopPropagation();
+          selectedButton = b.id;
+          $('iconMode').value = b.iconMode || 'cycle_3state';
+          $('buttonColor').value = b.color || '#484d56';
+          $('buttonSize').value = ((b.w || 0.035) * 100).toFixed(1);
+          activateMedia(b);
+        };
+
+        let sx, sy, ox, oy;
+        el.onpointerdown = e => {
+          if (e.target === grip) return;
+          e.stopPropagation();
+          selectedButton = b.id;
+          sx = e.clientX; sy = e.clientY;
+          ox = b.x; oy = b.y;
+          el.setPointerCapture(e.pointerId);
+          el.onpointermove = q => {
+            b.x = Math.max(0, Math.min(0.96, ox + (q.clientX - sx) / overlay.clientWidth));
+            b.y = Math.max(0, Math.min(0.96, oy + (q.clientY - sy) / overlay.clientHeight));
+            el.style.left = (b.x * 100) + '%';
+            el.style.top = (b.y * 100) + '%';
+          };
+          el.onpointerup = () => { el.onpointermove = null; };
+        };
+
+        grip.onpointerdown = e => {
+          e.stopPropagation();
+          sx = e.clientX; sy = e.clientY;
+          ox = b.w; oy = b.h;
+          grip.setPointerCapture(e.pointerId);
+          grip.onpointermove = q => {
+            const sz = Math.max(0.015, Math.min(0.15, ox + (q.clientX - sx) / overlay.clientWidth));
+            b.w = sz; b.h = sz;
+            el.style.width = (b.w * 100) + '%';
+            el.style.height = (b.h * 100) + '%';
+          };
+          grip.onpointerup = () => { grip.onpointermove = null; };
+        };
+
+        overlay.append(el);
+
+        // Render sleek seek slider beside button when playing or paused
+        if (b.state === 'playing' || b.state === 'paused') {
+          const player = activePlayers.get(b.id);
+          const seek = document.createElement('input');
+          seek.type = 'range';
+          seek.className = 'inline-seek';
+          seek.min = 0;
+          seek.max = 1000;
+          seek.style.accentColor = b.color || '#484d56';
+          seek.value = (player && player.duration) ? (player.currentTime / player.duration) * 1000 : 0;
+          seek.onpointerdown = e => e.stopPropagation();
+          seek.onclick = e => e.stopPropagation();
+          seek.oninput = e => {
+            if (player && player.duration) {
+              player.currentTime = (Number(e.target.value) / 1000) * player.duration;
+            }
+          };
+          if (player) {
+            const updateTime = () => {
+              if (player.duration && !seek.matches(':active')) {
+                seek.value = (player.currentTime / player.duration) * 1000;
+              }
+            };
+            player.removeEventListener('timeupdate', player._seekFn);
+            player._seekFn = updateTime;
+            player.addEventListener('timeupdate', updateTime);
+          }
+          el.append(seek);
+        }
+      });
+    });
+  }
+
+  function addFiles(files) {
+    const ch = getActiveChapter();
+    if (!ch) return toast('Please select or create a chapter first');
+    [...files].forEach(file => {
+      ch.media.push({
+        id: crypto.randomUUID(),
+        file,
+        name: file.name,
+        size: file.size,
+        type: 'audio',
+        mime: file.type || 'audio/mpeg'
+      });
+    });
+    renderMedia();
+    toast(`Added ${files.length} MP3 files to "${ch.title}"`);
+  }
+
+  function removeButton() {
+    const ch = getActiveChapter();
+    if (!ch || !selectedButton) return toast('Select a button first');
+    ch.buttons = ch.buttons.filter(b => b.id !== selectedButton);
+    selectedButton = null;
+    renderAllButtons();
+    toast('Button removed');
+  }
+
+  function changeZoom(delta) {
+    scale = Math.max(0.5, Math.min(3.0, scale + delta));
+    applyZoomCSS();
+  }
+
+  function resetZoom() {
+    scale = 1.25;
+    applyZoomCSS();
+  }
+
+  function goToPage(n) {
+    const ch = getActiveChapter();
+    if (!ch || !ch.pdfDoc) return;
+    const page = Math.max(1, Math.min(ch.pageOrder.length, n));
+    $('pageNo').value = page;
+    document.querySelector(`.page-card[data-seq="${page}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function updateSelectedControl() {
+    const ch = getActiveChapter();
+    if (!ch) return;
+    const b = ch.buttons.find(x => x.id === selectedButton);
+    if (!b) return;
+    b.iconMode = $('iconMode').value;
+    b.color = $('buttonColor').value;
+    const size = (+($('buttonSize').value) || 3.5) / 100;
+    b.w = size; b.h = size;
+    renderAllButtons();
+  }
+
+  $('iconMode').onchange = updateSelectedControl;
+  $('buttonColor').oninput = updateSelectedControl;
+  $('buttonSize').oninput = updateSelectedControl;
+
+  $('pdfFileInput').onchange = e => e.target.files[0] && loadPdfForCurrentChapter(e.target.files[0]);
+  $('audioInput').onchange = e => addFiles(e.target.files);
+  $('clearAllAudio').onclick = () => {
+    const ch = getActiveChapter();
+    if (ch) {
+      ch.media = [];
+      selectedMedia = null;
+      renderMedia();
+      toast('Cleared audio library for ' + ch.title);
+    }
+  };
+  $('removeButton').onclick = removeButton;
+  $('prev').onclick = () => goToPage(+(($('pageNo').value) || 1) - 1);
+  $('next').onclick = () => goToPage(+(($('pageNo').value) || 1) + 1);
+  $('zoomIn').onclick = () => changeZoom(0.2);
+  $('zoomOut').onclick = () => changeZoom(-0.2);
+  $('zoomReset').onclick = resetZoom;
+  $('pageNo').onchange = e => goToPage(+e.target.value || 1);
+
+  // --- PINCH TO ZOOM HANDLERS ---
+  let pinchStartDist = 0;
+  let pinchStartScale = scale;
+  const viewerEl = $('viewer');
+
+  viewerEl.addEventListener('touchstart', e => {
+    if (e.touches.length === 2) {
+      pinchStartDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      pinchStartScale = scale;
+    }
+  }, { passive: true });
+
+  viewerEl.addEventListener('touchmove', e => {
+    if (e.touches.length === 2 && pinchStartDist > 0) {
+      e.preventDefault();
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const factor = dist / pinchStartDist;
+      const newScale = Math.max(0.5, Math.min(3.0, pinchStartScale * factor));
+      if (Math.abs(newScale - scale) > 0.03) {
+        scale = newScale;
+        changeZoom(0);
+      }
+    }
+  }, { passive: false });
+
+  viewerEl.addEventListener('touchend', e => {
+    if (e.touches.length < 2) pinchStartDist = 0;
+  });
+
+  viewerEl.addEventListener('wheel', e => {
+    if (e.ctrlKey) {
+      e.preventDefault();
+      changeZoom(e.deltaY < 0 ? 0.15 : -0.15);
+    }
+  }, { passive: false });
+
+  // --- EXPORT BUILDERS (SINGLE CHAPTER & FULL BOOK) ---
+  async function buildExportPackage(isSingleHtml = false, targetChapterId = null) {
+    const ch = targetChapterId ? book.chapters.find(c => c.id === targetChapterId) : getActiveChapter();
+    if (!ch || !ch.pdfDoc) {
+      toast('Please select a chapter with a loaded PDF');
+      return;
+    }
+    toast(`Generating offline interactive player for "${ch.title}"...`);
+
+    const zip = new JSZip();
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+    // 1. Process Media
+    const mediaRows = [];
+    for (let i = 0; i < ch.media.length; i++) {
+      const m = ch.media[i];
+      const safe = m.name.replace(/[^a-z0-9._-]/gi, '_');
+      const arrayBuf = await m.file.arrayBuffer();
+      zip.file('audio/' + safe, arrayBuf);
+
+      const u8 = new Uint8Array(arrayBuf);
+      let bin = '';
+      for (let k = 0; k < u8.length; k += 8192) bin += String.fromCharCode(...u8.subarray(k, k + 8192));
+      const b64 = 'data:audio/mpeg;base64,' + btoa(bin);
+
+      mediaRows.push({
+        index: i,
+        name: esc(m.name),
+        file: 'audio/' + safe,
+        src: b64
+      });
+    }
+
+    // 2. Render Page Images & Controls
+    const pageSections = [];
+    const exportScale = 1.6;
+
+    for (let seqIdx = 0; seqIdx < ch.pageOrder.length; seqIdx++) {
+      const origPageNum = ch.pageOrder[seqIdx];
+      const displayPageNum = seqIdx + 1;
+      const p = await ch.pdfDoc.getPage(origPageNum);
+      const vp = p.getViewport({ scale: exportScale });
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = vp.width;
+      offCanvas.height = vp.height;
+      await p.render({ canvasContext: offCanvas.getContext('2d'), viewport: vp }).promise;
+
+      const dataUrl = offCanvas.toDataURL('image/png');
+      const imgPath = 'pages/page-' + displayPageNum + '.png';
+      zip.file(imgPath, dataUrl.split(',')[1], { base64: true });
+
+      const pageButtons = ch.buttons.filter(b => b.page === origPageNum).map(b => {
+        const audioIdx = ch.media.findIndex(m => m.id === b.mediaId);
+        if (audioIdx < 0) return '';
+        const color = b.color || '#484d56';
+        const mode = b.iconMode || 'cycle_3state';
+        return `<button type="button" class="control" data-audio="${audioIdx}" data-mode="${mode}" data-state="stopped" style="left:${b.x * 100}%; top:${b.y * 100}%; width:${b.w * 100}%; height:${b.h * 100}%; color:${color};" onclick="toggleControl(this)" aria-label="Play audio"><span class="btn-icon">▶</span></button>`;
+      }).join('');
+
+      pageSections.push(`
+        <section class="page" data-page="${displayPageNum}">
+          <img src="${dataUrl}" alt="Page ${displayPageNum}">
+          <div class="overlay">${pageButtons}</div>
+        </section>
+      `);
+    }
+
+    // 3. Player HTML
+    const playerHtml = generateOfflinePlayerTemplate(ch.title, pageSections.join(''), mediaRows);
+
+    if (isSingleHtml) {
+      const blob = new Blob([playerHtml], { type: 'text/html' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${ch.title.replace(/[^a-z0-9_-]/gi, '_')}-player.html`;
+      a.click();
+      toast('Single-file HTML player downloaded!');
+    } else {
+      zip.file('index.html', playerHtml);
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(zipBlob);
+      a.download = `${ch.title.replace(/[^a-z0-9_-]/gi, '_')}-offline.zip`;
+      a.click();
+      toast('Offline Interactive Web ZIP downloaded!');
+    }
+  }
+
+  // --- FULL MULTI-CHAPTER BOOK EXPORT ---
+  window.exportFullBookZip = async function() {
+    const validChapters = book.chapters.filter(c => c.pdfDoc);
+    if (!validChapters.length) {
+      return toast('Please load PDFs for your chapters before exporting the book.');
+    }
+    toast('Generating Full Multi-Chapter Textbook Player...');
+
+    const zip = new JSZip();
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const exportScale = 1.5;
+
+    const bookManifest = [];
+
+    for (let cIdx = 0; cIdx < validChapters.length; cIdx++) {
+      const ch = validChapters[cIdx];
+      const chKey = `chap_${cIdx + 1}`;
+      const chMediaRows = [];
+
+      // Process Chapter Audio
+      for (let i = 0; i < ch.media.length; i++) {
+        const m = ch.media[i];
+        const safe = `${chKey}_${m.name.replace(/[^a-z0-9._-]/gi, '_')}`;
+        const arrayBuf = await m.file.arrayBuffer();
+        zip.file(`audio/${safe}`, arrayBuf);
+
+        const u8 = new Uint8Array(arrayBuf);
+        let bin = '';
+        for (let k = 0; k < u8.length; k += 8192) bin += String.fromCharCode(...u8.subarray(k, k + 8192));
+        const b64 = 'data:audio/mpeg;base64,' + btoa(bin);
+
+        chMediaRows.push({
+          index: i,
+          name: esc(m.name),
+          file: `audio/${safe}`,
+          src: b64
+        });
+      }
+
+      // Process Chapter Pages
+      const chPages = [];
+      for (let seqIdx = 0; seqIdx < ch.pageOrder.length; seqIdx++) {
+        const origPageNum = ch.pageOrder[seqIdx];
+        const displayPageNum = seqIdx + 1;
+        const p = await ch.pdfDoc.getPage(origPageNum);
+        const vp = p.getViewport({ scale: exportScale });
+        const offCanvas = document.createElement('canvas');
+        offCanvas.width = vp.width;
+        offCanvas.height = vp.height;
+        await p.render({ canvasContext: offCanvas.getContext('2d'), viewport: vp }).promise;
+
+        const dataUrl = offCanvas.toDataURL('image/png');
+        const imgPath = `pages/${chKey}_page_${displayPageNum}.png`;
+        zip.file(imgPath, dataUrl.split(',')[1], { base64: true });
+
+        const pageButtons = ch.buttons.filter(b => b.page === origPageNum).map(b => {
+          const audioIdx = ch.media.findIndex(m => m.id === b.mediaId);
+          if (audioIdx < 0) return '';
+          const color = b.color || '#484d56';
+          const mode = b.iconMode || 'cycle_3state';
+          return `<button type="button" class="control" data-chapter="${cIdx}" data-audio="${audioIdx}" data-mode="${mode}" data-state="stopped" style="left:${b.x * 100}%; top:${b.y * 100}%; width:${b.w * 100}%; height:${b.h * 100}%; color:${color};" onclick="toggleControl(this)" aria-label="Play audio"><span class="btn-icon">▶</span></button>`;
+        }).join('');
+
+        chPages.push(`
+          <section class="page" data-chapter="${cIdx}" data-page="${displayPageNum}">
+            <img src="${dataUrl}" alt="${ch.title} - Page ${displayPageNum}">
+            <div class="overlay">${pageButtons}</div>
+          </section>
+        `);
+      }
+
+      bookManifest.push({
+        index: cIdx,
+        id: ch.id,
+        title: esc(ch.title),
+        category: esc(ch.category || 'Chapter'),
+        color: ch.color || '#e57088',
+        pagesHtml: chPages.join(''),
+        media: chMediaRows
+      });
+    }
+
+    const multiChapterHtml = generateMultiChapterPlayerTemplate(book.title, bookManifest);
+    zip.file('index.html', multiChapterHtml);
+
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(zipBlob);
+    a.download = `EPS-TOPIK-Interactive-Textbook-Full.zip`;
+    a.click();
+    toast('Complete Interactive Book ZIP Downloaded!');
+  };
+
+  function generateOfflinePlayerTemplate(title, pageHtml, mediaRows) {
+    return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5.0, user-scalable=yes">
+  <title>${title} · Interactive PDF</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #13161c;
+      --panel: #1a2028;
+      --panel2: #222a36;
+      --line: #344050;
+      --accent-teal: #20b2aa;
+      --accent-coral: #e57088;
+      --text: #f0f4f8;
+      --muted: #9ba8b8;
+      scrollbar-color: #49586c #161b22;
+      scrollbar-width: thin;
+    }
+    * { box-sizing: border-box; }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: #161b22; }
+    ::-webkit-scrollbar-thumb { background: #49586c; border-radius: 5px; border: 2px solid #161b22; }
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.4 system-ui, -apple-system, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    .app { height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
+    .toolbar {
+      height: 54px;
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+      z-index: 50;
+    }
+    .brand-tag {
+      display: inline-flex;
+      align-items: center;
+      background: #252b36;
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid #3c4858;
+    }
+    .brand-tag .icon-box { background: #252b36; color: #fff; padding: 2px 6px; font-size: 11px; }
+    .brand-tag .title-box { background: var(--accent-coral); color: #fff; padding: 2px 8px; font-weight: 800; font-size: 11px; }
+    .spacer { flex: 1; }
+    .toolbar button, .panel button {
+      min-width: 38px;
+      min-height: 38px;
+      padding: 6px 11px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel2);
+      color: #f1f3f4;
+      font: inherit;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .toolbar .menu-btn { font-size: 13px; font-weight: 700; background: var(--accent-teal); border-color: var(--accent-teal); color: #fff; }
+    .viewer {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      overflow-y: scroll;
+      overflow-x: auto;
+      background: #0d1015;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y;
+      overscroll-behavior: contain;
+    }
+    .pages {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      padding: 20px 20px 60px;
+      margin: 0 auto;
+      width: max-content;
+      min-width: 100%;
+      transform-origin: top center;
+      transition: transform 0.12s ease-out;
+    }
+    .page {
+      position: relative;
+      width: min(100vw - 24px, 920px);
+      flex: none;
+      background: #fff;
+      box-shadow: 0 4px 25px rgba(0,0,0,0.6);
+      border-radius: 4px;
+      overflow: hidden;
+      user-select: none;
+    }
+    .page img { display: block; width: 100%; height: auto; pointer-events: none; -webkit-user-drag: none; }
+    .overlay { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+    .control {
+      position: absolute;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 0;
+      color: #484d56;
+      font-size: clamp(14px, 1.8vw, 24px);
+      font-weight: 800;
+      line-height: 1;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      padding: 6px;
+      min-width: 28px;
+      min-height: 28px;
+      user-select: none;
+      z-index: 50;
+      transition: transform 0.1s;
+    }
+    .control:hover { transform: scale(1.2); }
+    .inline-seek {
+      position: absolute;
+      left: calc(100% + 6px);
+      top: 50%;
+      transform: translateY(-50%);
+      width: 105px;
+      height: 14px;
+      z-index: 60;
+      cursor: pointer;
+      touch-action: auto;
+      pointer-events: auto;
+      accent-color: #484d56;
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
+    }
+    @media (max-width: 600px) {
+      .inline-seek { left: 50%; top: calc(100% + 4px); transform: translateX(-50%); width: 85px; }
+    }
+    .panel {
+      position: fixed;
+      z-index: 100;
+      top: 54px;
+      right: 0;
+      bottom: 0;
+      width: min(350px, 90vw);
+      padding: 18px;
+      background: var(--panel);
+      border-left: 1px solid var(--line);
+      box-shadow: -6px 0 25px rgba(0,0,0,0.6);
+      overflow-y: auto;
+      transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .panel.hidden { transform: translateX(100%); }
+    .card {
+      padding: 12px;
+      margin: 10px 0;
+      background: var(--panel2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent-teal);
+    }
+    .card strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; margin-bottom: 6px; }
+    .card-controls { display: flex; gap: 6px; margin-top: 8px; }
+    .card-controls button { flex: 1; min-height: 36px; font-size: 13px; font-weight: 600; }
+  </style>
+</head>
+<body oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
+<div class="app">
+  <header class="toolbar">
+    <div class="brand-tag">
+      <span class="icon-box">🔊</span>
+      <span class="title-box">${title}</span>
+    </div>
+    <span class="spacer"></span>
+    <button onclick="zoomOut()" title="Zoom Out">-</button>
+    <button onclick="zoomReset()" title="Reset Zoom" id="zoomBtn">100%</button>
+    <button onclick="zoomIn()" title="Zoom In">+</button>
+    <button class="menu-btn" onclick="togglePanel()">♪ Audio</button>
+  </header>
+  <main class="viewer" id="playerViewer">
+    <div class="pages" id="playerPages">${pageHtml}</div>
+  </main>
+  <aside id="panel" class="panel hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <h2 style="margin:0; font-size:16px;">Audio Library</h2>
+      <button onclick="togglePanel()">✕</button>
+    </div>
+    <p style="color:var(--muted); font-size:12px; margin:0 0 12px;">Pinch to zoom pages. Tap ▶ to play audio with interactive seek.</p>
+    ${mediaRows.map((m, i) => `
+      <div class="card">
+        <strong>♪ ${m.name}</strong>
+        <audio id="audio_${i}" preload="auto" controlsList="nodownload noplaybackrate" style="display:none;">
+          <source src="${m.src}" type="audio/mpeg">
+          <source src="${m.file}" type="audio/mpeg">
+        </audio>
+        <div class="card-controls">
+          <button onclick="playAudio(${i})">▶ Play</button>
+          <button onclick="pauseAudio(${i})">Ⅱ Pause</button>
+          <button onclick="stopAudio(${i})">■ Stop</button>
+        </div>
+      </div>
+    `).join('')}
+  </aside>
+</div>
+<script>
+  const panel = document.getElementById('panel');
+  const audios = [...document.querySelectorAll('audio')];
+  const viewerEl = document.getElementById('playerViewer');
+  let playerZoom = 1.0;
+
+  function applyZoom(z) {
+    playerZoom = Math.max(0.5, Math.min(3.5, z));
+    document.getElementById('zoomBtn').textContent = Math.round(playerZoom * 100) + '%';
+    const baseWidth = Math.min(window.innerWidth - 24, 920);
+    document.querySelectorAll('.page').forEach(p => {
+      p.style.width = (baseWidth * playerZoom) + 'px';
+      p.style.maxWidth = 'none';
+    });
+  }
+  window.zoomIn = () => applyZoom(playerZoom + 0.2);
+  window.zoomOut = () => applyZoom(playerZoom - 0.2);
+  window.zoomReset = () => applyZoom(1.0);
+
+  let pStartDist = 0, pStartZoom = 1.0;
+  viewerEl.addEventListener('touchstart', e => {
+    if (e.touches.length === 2) {
+      pStartDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      pStartZoom = playerZoom;
+    }
+  }, { passive: true });
+  viewerEl.addEventListener('touchmove', e => {
+    if (e.touches.length === 2 && pStartDist > 0) {
+      e.preventDefault();
+      const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      applyZoom(pStartZoom * (dist / pStartDist));
+    }
+  }, { passive: false });
+  viewerEl.addEventListener('touchend', e => { if (e.touches.length < 2) pStartDist = 0; });
+  viewerEl.addEventListener('wheel', e => { if (e.ctrlKey) { e.preventDefault(); applyZoom(playerZoom + (e.deltaY < 0 ? 0.15 : -0.15)); } }, { passive: false });
+
+  function togglePanel() { panel.classList.toggle('hidden'); }
+
+  const activeSeekers = new Map();
+  function showSeeker(button, audioIndex) {
+    const audio = audios[audioIndex];
+    if (!audio || button.querySelector('.inline-seek')) return;
+    const seek = document.createElement('input');
+    seek.type = 'range';
+    seek.className = 'inline-seek';
+    seek.min = 0; seek.max = 1000;
+    seek.value = (audio.duration && !isNaN(audio.duration)) ? (audio.currentTime / audio.duration) * 1000 : 0;
+    seek.style.accentColor = button.style.color || '#484d56';
+    seek.dataset.seekFor = audioIndex;
+    seek.onpointerdown = e => e.stopPropagation();
+    seek.onclick = e => e.stopPropagation();
+    seek.oninput = e => { if (audio.duration && !isNaN(audio.duration)) audio.currentTime = (Number(e.target.value) / 1000) * audio.duration; };
+    const updateTime = () => { if (audio.duration && !isNaN(audio.duration) && !seek.matches(':active')) seek.value = (audio.currentTime / audio.duration) * 1000; };
+    audio.removeEventListener('timeupdate', audio._seekFn);
+    audio._seekFn = updateTime;
+    audio.addEventListener('timeupdate', updateTime);
+    button.append(seek);
+    activeSeekers.set(audioIndex, seek);
+  }
+
+  function hideSeeker(audioIndex) {
+    document.querySelectorAll('.inline-seek[data-seek-for="' + audioIndex + '"]').forEach(s => s.remove());
+    activeSeekers.delete(audioIndex);
+  }
+
+  function setButtonState(index, state) {
+    document.querySelectorAll('[data-audio="' + index + '"]').forEach(btn => {
+      btn.dataset.state = state;
+      const mode = btn.dataset.mode || 'cycle_3state';
+      let glyph = '▶';
+      if (mode === 'play_only') glyph = '▶';
+      else if (mode === 'pause_only') glyph = 'Ⅱ';
+      else if (mode === 'stop_only') glyph = '■';
+      else if (mode === 'toggle_stop') glyph = (state === 'playing') ? '■' : '▶';
+      else if (mode === 'toggle_pause') glyph = (state === 'playing') ? 'Ⅱ' : '▶';
+      else { glyph = (state === 'playing') ? 'Ⅱ' : ((state === 'paused') ? '■' : '▶'); }
+
+      let iconSpan = btn.querySelector('.btn-icon');
+      if (!iconSpan) { iconSpan = document.createElement('span'); iconSpan.className = 'btn-icon'; btn.prepend(iconSpan); }
+      iconSpan.textContent = glyph;
+      if (state === 'playing' || state === 'paused') showSeeker(btn, index);
+      else hideSeeker(index);
+    });
+  }
+
+  function stopOthers(exceptIndex) {
+    audios.forEach((audio, idx) => { if (idx !== exceptIndex) { audio.pause(); audio.currentTime = 0; setButtonState(idx, 'stopped'); } });
+  }
+  function playAudio(index) { const audio = audios[index]; if (!audio) return; stopOthers(index); audio.play().then(() => setButtonState(index, 'playing')).catch(() => {}); }
+  function pauseAudio(index) { const audio = audios[index]; if (!audio) return; audio.pause(); setButtonState(index, 'paused'); }
+  function stopAudio(index) { const audio = audios[index]; if (!audio) return; audio.pause(); audio.currentTime = 0; setButtonState(index, 'stopped'); }
+
+  function toggleControl(button) {
+    const index = Number(button.dataset.audio);
+    const mode = button.dataset.mode || 'cycle_3state';
+    const audio = audios[index];
+    if (!audio) return;
+    const currentState = button.dataset.state || (audio.paused ? 'stopped' : 'playing');
+    if (mode === 'cycle_3state') {
+      if (currentState === 'playing' && !audio.paused) pauseAudio(index);
+      else if (currentState === 'paused') stopAudio(index);
+      else playAudio(index);
+    } else if (mode === 'toggle_stop') {
+      if (!audio.paused) stopAudio(index); else playAudio(index);
+    } else if (mode === 'toggle_pause') {
+      if (!audio.paused) pauseAudio(index); else playAudio(index);
+    }
+  }
+
+  audios.forEach((audio, index) => {
+    audio.addEventListener('play', () => { stopOthers(index); setButtonState(index, 'playing'); });
+    audio.addEventListener('pause', () => { const btn = document.querySelector('[data-audio="' + index + '"]'); if (btn && btn.dataset.state !== 'stopped') setButtonState(index, 'paused'); });
+    audio.addEventListener('ended', () => { audio.currentTime = 0; setButtonState(index, 'stopped'); });
+  });
+
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && ['s', 'u', 'p'].includes(e.key.toLowerCase())) e.preventDefault();
+    if (e.key === 'F12' || ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c'].includes(e.key.toLowerCase()))) e.preventDefault();
+  });
+<\/script>
+</body>
+</html>`;
+  }
+
+  function generateMultiChapterPlayerTemplate(bookTitle, chapters) {
+    return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5.0, user-scalable=yes">
+  <title>${bookTitle} · Offline Interactive Textbook</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #13161c;
+      --panel: #1a2028;
+      --panel2: #222a36;
+      --line: #344050;
+      --accent-teal: #20b2aa;
+      --accent-coral: #e57088;
+      --text: #f0f4f8;
+      --muted: #9ba8b8;
+    }
+    * { box-sizing: border-box; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #161b22; }
+    ::-webkit-scrollbar-thumb { background: #49586c; border-radius: 4px; }
+    html, body {
+      margin: 0; width: 100%; height: 100%; height: 100dvh; overflow: hidden;
+      background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, -apple-system, sans-serif;
+      user-select: none; -webkit-user-select: none;
+    }
+    .app { display: grid; grid-template-columns: 280px 1fr; height: 100vh; height: 100dvh; }
+    .toc-sidebar {
+      background: var(--panel); border-right: 1px solid var(--line);
+      display: flex; flex-direction: column; overflow-y: auto;
+    }
+    .toc-head { padding: 14px 16px; border-bottom: 1px solid var(--line); background: #1f2732; }
+    .toc-item {
+      padding: 12px 14px; border-bottom: 1px solid var(--line); cursor: pointer;
+      transition: background 0.15s; display: flex; flex-direction: column; gap: 3px;
+    }
+    .toc-item:hover { background: #1e2632; }
+    .toc-item.active { background: #222c3b; border-left: 4px solid var(--accent-teal); }
+    .toc-item strong { font-size: 13px; color: #fff; }
+    .toc-item span { font-size: 11px; color: var(--muted); }
+    
+    .workspace { display: flex; flex-direction: column; min-width: 0; }
+    .toolbar {
+      height: 54px; min-height: 54px; display: flex; align-items: center; gap: 10px;
+      padding: 0 16px; background: var(--panel); border-bottom: 1px solid var(--line);
+    }
+    .toolbar button {
+      min-width: 36px; min-height: 36px; padding: 6px 11px; border: 1px solid var(--line);
+      border-radius: 6px; background: var(--panel2); color: #fff; font: inherit; cursor: pointer;
+    }
+    .viewer {
+      flex: 1; min-height: 0; overflow-y: scroll; overflow-x: auto; background: #0d1015;
+      touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch;
+    }
+    .pages {
+      display: flex; flex-direction: column; align-items: center; gap: 22px;
+      padding: 20px 20px 60px; margin: 0 auto; width: max-content; min-width: 100%;
+    }
+    .page {
+      position: relative; width: min(100vw - 24px, 920px); flex: none;
+      background: #fff; box-shadow: 0 4px 25px rgba(0,0,0,0.6); border-radius: 4px; overflow: hidden;
+    }
+    .page img { display: block; width: 100%; height: auto; pointer-events: none; }
+    .overlay { position: absolute; inset: 0; pointer-events: none; }
+    .control {
+      position: absolute; pointer-events: auto; display: flex; align-items: center; justify-content: center;
+      background: transparent; border: 0; color: #484d56; font-size: clamp(14px, 1.8vw, 24px);
+      font-weight: 800; cursor: pointer; padding: 6px; z-index: 50;
+    }
+    .inline-seek {
+      position: absolute; left: calc(100% + 6px); top: 50%; transform: translateY(-50%);
+      width: 105px; height: 14px; z-index: 60; cursor: pointer; accent-color: #484d56;
+    }
+    @media (max-width: 768px) {
+      .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+      .toc-sidebar { max-height: 35vh; border-right: 0; border-bottom: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body oncontextmenu="return false;" ondragstart="return false;">
+<div class="app">
+  <aside class="toc-sidebar">
+    <div class="toc-head">
+      <h2 style="margin:0 0 4px; font-size:15px; color:#fff;">📚 ${bookTitle}</h2>
+      <span style="font-size:11px; color:var(--muted);">Table of Contents (${chapters.length} Chapters)</span>
+    </div>
+    <div id="tocList">
+      ${chapters.map((c, i) => `
+        <div class="toc-item ${i === 0 ? 'active' : ''}" onclick="switchChapterView(${i})">
+          <strong>${c.title}</strong>
+          <span>${c.category} · ${c.media.length} Audio</span>
+        </div>
+      `).join('')}
+    </div>
+  </aside>
+  
+  <main class="workspace">
+    <header class="toolbar">
+      <strong id="activeChapTitle" style="font-size:14px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${chapters[0]?.title || ''}</strong>
+      <span style="flex:1;"></span>
+      <button onclick="zoomOut()">-</button>
+      <button onclick="zoomReset()" id="zoomBtn">100%</button>
+      <button onclick="zoomIn()">+</button>
+    </header>
+    
+    <section class="viewer" id="playerViewer">
+      <div class="pages" id="playerPages">
+        ${chapters[0]?.pagesHtml || '<div style="padding:40px; color:var(--muted);">No pages</div>'}
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Embedded Audio Library -->
+<div id="audioPool" style="display:none;">
+  ${chapters.map((c, cIdx) => c.media.map(m => `
+    <audio id="audio_${cIdx}_${m.index}" preload="auto" controlsList="nodownload">
+      <source src="${m.src}" type="audio/mpeg">
+      <source src="${m.file}" type="audio/mpeg">
+    </audio>
+  `).join('')).join('')}
+</div>
+
+<script>
+  const chaptersData = ${JSON.stringify(chapters.map(c => ({ index: c.index, title: c.title, pagesHtml: c.pagesHtml })))};
+  let activeChapIndex = 0;
+  let playerZoom = 1.0;
+  const viewerEl = document.getElementById('playerViewer');
+
+  function switchChapterView(idx) {
+    activeChapIndex = idx;
+    document.querySelectorAll('.toc-item').forEach((item, i) => item.classList.toggle('active', i === idx));
+    document.getElementById('activeChapTitle').textContent = chaptersData[idx].title;
+    document.getElementById('playerPages').innerHTML = chaptersData[idx].pagesHtml;
+    stopAllAudio();
+    applyZoom(playerZoom);
+    viewerEl.scrollTop = 0;
+  }
+
+  function applyZoom(z) {
+    playerZoom = Math.max(0.5, Math.min(3.5, z));
+    document.getElementById('zoomBtn').textContent = Math.round(playerZoom * 100) + '%';
+    const baseWidth = Math.min(window.innerWidth - 24, 920);
+    document.querySelectorAll('.page').forEach(p => {
+      p.style.width = (baseWidth * playerZoom) + 'px';
+      p.style.maxWidth = 'none';
+    });
+  }
+  window.zoomIn = () => applyZoom(playerZoom + 0.2);
+  window.zoomOut = () => applyZoom(playerZoom - 0.2);
+  window.zoomReset = () => applyZoom(1.0);
+
+  function stopAllAudio() {
+    document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
+    document.querySelectorAll('.inline-seek').forEach(s => s.remove());
+    document.querySelectorAll('.control').forEach(btn => {
+      btn.dataset.state = 'stopped';
+      const icon = btn.querySelector('.btn-icon');
+      if (icon) icon.textContent = '▶';
+    });
+  }
+
+  function toggleControl(btn) {
+    const cIdx = Number(btn.dataset.chapter);
+    const aIdx = Number(btn.dataset.audio);
+    const audio = document.getElementById('audio_' + cIdx + '_' + aIdx);
+    if (!audio) return;
+
+    if (!audio.paused) {
+      audio.pause();
+      btn.dataset.state = 'paused';
+      btn.querySelector('.btn-icon').textContent = '■';
+    } else {
+      stopAllAudio();
+      audio.play().then(() => {
+        btn.dataset.state = 'playing';
+        btn.querySelector('.btn-icon').textContent = 'Ⅱ';
+        showSeek(btn, audio);
+      }).catch(() => {});
+    }
+  }
+
+  function showSeek(button, audio) {
+    if (button.querySelector('.inline-seek')) return;
+    const seek = document.createElement('input');
+    seek.type = 'range'; seek.className = 'inline-seek'; seek.min = 0; seek.max = 1000;
+    seek.value = (audio.duration) ? (audio.currentTime / audio.duration) * 1000 : 0;
+    seek.oninput = e => { if (audio.duration) audio.currentTime = (Number(e.target.value) / 1000) * audio.duration; };
+    const updateTime = () => { if (audio.duration && !seek.matches(':active')) seek.value = (audio.currentTime / audio.duration) * 1000; };
+    audio.addEventListener('timeupdate', updateTime);
+    audio.addEventListener('ended', () => { seek.remove(); button.querySelector('.btn-icon').textContent = '▶'; button.dataset.state = 'stopped'; });
+    button.append(seek);
+  }
+
+  document.addEventListener('contextmenu', e => e.preventDefault());
+<\/script>
+</body>
+</html>`;
+  }
+
+  // --- INITIALIZATION ---
+  $('exportZip').onclick = () => buildExportPackage(false);
+  $('exportFullBook').onclick = () => exportFullBookZip();
+
+  // Auto-init dashboard
+  renderDashboard();
+  switchChapter(book.chapters[0].id);
+  showDashboardView();
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW note:', err));
+    });
+  }
+</script>
+</body>
+</html>

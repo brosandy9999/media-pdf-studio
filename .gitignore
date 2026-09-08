@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+
+# Generated build output
+build/
+dist/
+test_output/
+
+# Local/editor files
+.venv/
+venv/
+.idea/
+.vscode/
+
+# Runtime/local data
+*.log
+*.tmp

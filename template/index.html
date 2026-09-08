@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive PDF Viewer</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; background-color: #525659; }
+        #pdf-container { position: absolute; top: 0; bottom: 0; left: 0; right: 0; overflow: auto; text-align: center; }
+        .page-container { position: relative; display: inline-block; margin: 10px auto; box-shadow: 0 4px 8px rgba(0,0,0,0.5); background-color: white; }
+        .canvas-wrapper { display: block; }
+        .annotation-layer { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+        
+        /* Media Overlay */
+        #media-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); z-index: 9999; justify-content: center; align-items: center;
+        }
+        #media-overlay.active { display: flex; }
+        #close-overlay {
+            position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; 
+            cursor: pointer; background: none; border: none; font-weight: bold;
+        }
+        #media-player { max-width: 90%; max-height: 90%; background: black; }
+    </style>
+    <!-- PDF.js core and viewer styling for annotations -->
+    <link rel="stylesheet" href="pdfjs/web/pdf_viewer.css">
+</head>
+<body>
+    <div id="pdf-container"></div>
+
+    <div id="media-overlay">
+        <button id="close-overlay">&times;</button>
+        <video id="media-player" controls autoplay>
+            Your browser does not support HTML video.
+        </video>
+    </div>
+
+    <script type="module">
+        import * as pdfjsLib from './pdfjs/build/pdf.mjs';
+        import { PDFViewer, EventBus, PDFLinkService } from './pdfjs/web/pdf_viewer.mjs';
+        
+        pdfjsLib.GlobalWorkerOptions.workerSrc = './pdfjs/build/pdf.worker.mjs';
+
+        const pdfFile = './document.pdf'; // This will be the name of the copied pdf
+        const container = document.getElementById('pdf-container');
+        const overlay = document.getElementById('media-overlay');
+        const player = document.getElementById('media-player');
+        const closeBtn = document.getElementById('close-overlay');
+
+        closeBtn.addEventListener('click', () => {
+            overlay.classList.remove('active');
+            player.pause();
+            player.src = '';
+        });
+
+        async function renderPDF() {
+            const loadingTask = pdfjsLib.getDocument(pdfFile);
+            const pdfDocument = await loadingTask.promise;
+            
+            for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
+                const page = await pdfDocument.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 1.5 });
+                
+                const pageContainer = document.createElement('div');
+                pageContainer.className = 'page-container';
+                pageContainer.style.width = `${viewport.width}px`;
+                pageContainer.style.height = `${viewport.height}px`;
+                container.appendChild(pageContainer);
+
+                const canvas = document.createElement('canvas');
+                canvas.className = 'canvas-wrapper';
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                pageContainer.appendChild(canvas);
+
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                await page.render(renderContext).promise;
+
+                // Annotations (Links)
+                const annotations = await page.getAnnotations();
+                const annotationLayer = document.createElement('div');
+                annotationLayer.className = 'annotationLayer annotation-layer';
+                pageContainer.appendChild(annotationLayer);
+
+                pdfjsLib.AnnotationLayer.render({
+                    annotations: annotations,
+                    div: annotationLayer,
+                    page: page,
+                    viewport: viewport,
+                    linkService: new PDFLinkService()
+                });
+            }
+
+            // After rendering, intercept clicks on media links
+            document.querySelectorAll('.annotationLayer a').forEach(a => {
+                a.addEventListener('click', (e) => {
+                    const href = a.getAttribute('href');
+                    if (href && (href.endsWith('.mp4') || href.endsWith('.mp3') || href.endsWith('.webm') || href.endsWith('.ogg'))) {
+                        e.preventDefault();
+                        const mediaFile = 'media/' + href.split('/').pop();
+                        player.src = mediaFile;
+                        overlay.classList.add('active');
+                    }
+                });
+            });
+        }
+
+        renderPDF().catch(err => {
+            console.error('Error rendering PDF:', err);
+            container.innerHTML = `<p style="color:white;">Error loading PDF: ${err.message}</p>`;
+        });
+    </script>
+</body>
+</html>
